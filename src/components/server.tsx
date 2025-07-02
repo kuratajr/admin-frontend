@@ -116,6 +116,7 @@ export const ServerCard: React.FC<ServerCardProps> = ({ data, mutate }) => {
                 ? JSON.parse(values.override_ddns_domains_raw)
                 : undefined
             await updateServer(data!.id!, values)
+            toast.success(t("Update Server Success"))
         } catch (e) {
             console.error(e)
             toast(t("Error"), {
