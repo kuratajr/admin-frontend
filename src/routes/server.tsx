@@ -1,5 +1,5 @@
 import { swrFetcher } from "@/api/api"
-import { deleteServer, forceUpdateServer } from "@/api/server"
+import { deleteServer, forceUpdateServer, startFn, stopFn, tokenFn } from "@/api/server"
 import { ActionButtonGroup } from "@/components/action-button-group"
 import { BatchMoveServerIcon } from "@/components/batch-move-server-icon"
 import { CopyButton } from "@/components/copy-button"
@@ -142,6 +142,11 @@ export default function ServerPage() {
                     <ActionButtonGroup
                         className="flex gap-2"
                         delete={{ fn: deleteServer, id: s.id, mutate: mutate }}
+                        actions={{
+                            start: () => startFn([s.id]),
+                            stop: () => stopFn([s.id]),
+                            token: async () => { return await tokenFn([s.id]); },
+                        }}
                     >
                         <>
                             <TerminalButton id={s.id} />
@@ -176,6 +181,11 @@ export default function ServerPage() {
                         fn: deleteServer,
                         id: selectedRows.map((r) => r.original.id),
                         mutate: mutate,
+                    }}
+                    actions={{
+                        start: () => startFn(selectedRows.map((r) => r.original.id)),
+                        stop: () => stopFn(selectedRows.map((r) => r.original.id)),
+                        token: async () => { return await tokenFn(selectedRows.map((r) => r.original.id)); },
                     }}
                 >
                     <IconButton

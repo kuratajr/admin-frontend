@@ -1,4 +1,4 @@
-import { updateServer } from "@/api/server"
+import { updateServer, updateServerConfigDetail } from "@/api/server"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -22,13 +22,20 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { IconButton } from "@/components/xui/icon-button"
 import { conv } from "@/lib/utils"
 import { asOptionalField } from "@/lib/utils"
 import { ModelServer } from "@/types"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -43,6 +50,9 @@ interface ServerCardProps {
 const serverFormSchema = z.object({
     name: z.string().min(1),
     note: asOptionalField(z.string()),
+    zone: asOptionalField(z.string()),
+    project_id: asOptionalField(z.string()),
+    cluster_id: asOptionalField(z.string()),
     public_note: asOptionalField(z.string()),
     display_index: z.coerce.number().int(),
     hide_for_guest: asOptionalField(z.boolean()),
@@ -83,6 +93,18 @@ export const ServerCard: React.FC<ServerCardProps> = ({ data, mutate }) => {
         },
     })
 
+    useEffect(() => {
+        const zone = form.getValues("zone")
+        if (zone === "asia-east1") {
+            form.setValue("project_id", "712605920671")
+        } else if (zone === "us-east4") {
+            form.setValue("project_id", "312045414151")
+        } else {
+            form.setValue("project_id", "")
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [form.watch("zone")])
+
     const [open, setOpen] = useState(false)
 
     const onSubmit = async (values: z.infer<typeof serverFormSchema>) => {
@@ -104,6 +126,15 @@ export const ServerCard: React.FC<ServerCardProps> = ({ data, mutate }) => {
         setOpen(false)
         await mutate()
         form.reset()
+    }
+
+    const handlePullServerConfig = async () => {
+        try {
+            await updateServerConfigDetail(data!.id!)
+            toast.success(t("PullServerConfigSuccess"))
+        } catch (e) {
+            toast.error(t("Error"), { description: t("PullServerConfigFailed") })
+        }
     }
 
     return (
@@ -223,6 +254,135 @@ export const ServerCard: React.FC<ServerCardProps> = ({ data, mutate }) => {
                                         </FormItem>
                                     )}
                                 />
+
+                                <FormField
+                                    control={form.control}
+                                    name="zone"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>{t("Zone")}</FormLabel>
+                                            <FormControl>
+                                                <Select
+                                                    onValueChange={field.onChange}
+                                                    value={field.value}
+                                                >
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        <SelectItem value="SelectAnOption">
+                                                            {t("SelectAnOption")}
+                                                        </SelectItem>
+                                                        <SelectItem value="asia-east1">
+                                                            {t("ASIA")}
+                                                        </SelectItem>
+                                                        <SelectItem value="us-east4">
+                                                            {t("US")}
+                                                        </SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="project_id"
+                                    render={({ field }) => {
+                                        const zone = form.watch("zone")
+                                        let options: { value: string; label: string }[] = []
+                                        if (zone === "asia-east1") {
+                                            options = [
+                                                { value: "712605920671", label: "712605920671" },
+                                                { value: "5120269316", label: "5120269316" },
+                                            ]
+                                        } else if (zone === "us-east4") {
+                                            options = [
+                                                { value: "312045414151", label: "312045414151" },
+                                            ]
+                                        }
+                                        return (
+                                            <FormItem>
+                                                <FormLabel>{t("ProjectID")}</FormLabel>
+                                                <FormControl>
+                                                    <Select
+                                                        onValueChange={field.onChange}
+                                                        value={field.value}
+                                                        disabled={!zone}
+                                                    >
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue
+                                                                    placeholder={t(
+                                                                        "SelectAnOption",
+                                                                    )}
+                                                                />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="SelectAnOption">
+                                                                {t("SelectAnOption")}
+                                                            </SelectItem>
+                                                            {options.map((opt) => (
+                                                                <SelectItem
+                                                                    key={opt.value}
+                                                                    value={opt.value}
+                                                                >
+                                                                    {opt.label}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )
+                                    }}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="cluster_id"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>{t("ClusterID")}</FormLabel>
+                                            <FormControl>
+                                                <Select
+                                                    onValueChange={field.onChange}
+                                                    value={field.value}
+                                                >
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        <SelectItem value="SelectAnOption">
+                                                            {t("SelectAnOption")}
+                                                        </SelectItem>
+                                                        <SelectItem value="workstation-cluster">
+                                                            {t("workstation-cluster")}
+                                                        </SelectItem>
+                                                        {[...Array(9)].map((_, i) => (
+                                                            <SelectItem
+                                                                key={i + 2}
+                                                                value={`workstation-cluster-${i + 2}`}
+                                                            >
+                                                                {`workstation-cluster-${i + 2}`}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
                                 <FormField
                                     control={form.control}
                                     name="note"
@@ -249,15 +409,31 @@ export const ServerCard: React.FC<ServerCardProps> = ({ data, mutate }) => {
                                         </FormItem>
                                     )}
                                 />
-                                <DialogFooter className="justify-end">
-                                    <DialogClose asChild>
-                                        <Button type="button" className="my-2" variant="secondary">
-                                            {t("Close")}
-                                        </Button>
-                                    </DialogClose>
-                                    <Button type="submit" className="my-2">
-                                        {t("Submit")}
+
+                                <DialogFooter
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                    }}
+                                >
+                                    <Button type="button" className="my-2" variant="destructive"  onClick={handlePullServerConfig}>
+                                        {t("PullServerConfig")}
                                     </Button>
+                                    <div className="flex gap-2">
+                                        <DialogClose asChild>
+                                            <Button
+                                                type="button"
+                                                className="my-2"
+                                                variant="secondary"
+                                            >
+                                                {t("Close")}
+                                            </Button>
+                                        </DialogClose>
+                                        <Button type="submit" className="my-2">
+                                            {t("Submit")}
+                                        </Button>
+                                    </div>
                                 </DialogFooter>
                             </form>
                         </Form>

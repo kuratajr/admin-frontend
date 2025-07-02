@@ -17,6 +17,8 @@ import {
     Trash2,
     Upload,
     UserPen,
+    CirclePause,
+    CirclePlay,
 } from "lucide-react"
 import { forwardRef } from "react"
 
@@ -39,6 +41,9 @@ export interface IconButtonProps extends ButtonProps {
         | "cog"
         | "minus"
         | "user-pen"
+        | "start"
+        | "stop"
+        | "token"
 }
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>((props, ref) => {
@@ -101,6 +106,15 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>((props,
                     }
                     case "user-pen": {
                         return <UserPen />
+                    }
+                    case "start": {
+                        return <CirclePlay />
+                    }
+                    case "stop": {
+                        return <CirclePause />
+                    }
+                    case "token": {
+                        return <CogIcon />
                     }
                 }
             })()}

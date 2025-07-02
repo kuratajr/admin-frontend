@@ -16,6 +16,26 @@ export const deleteServer = async (id: number[]): Promise<void> => {
     return fetcher<void>(FetcherMethod.POST, "/api/v1/batch-delete/server", id)
 }
 
+export const updateServerConfigDetail = async (id: number): Promise<void> => {
+    return fetcher<void>(FetcherMethod.GET, `/api/v1/server/google/detail/${id}`)
+}
+
+export const startFn = async (id: number[]) => {
+    return fetcher<void>(FetcherMethod.POST, "/api/v1/oauth2/google/start", id)
+}
+
+export const stopFn = async (id: number[]) => {
+    return fetcher<void>(FetcherMethod.POST, "/api/v1/oauth2/google/stop", id)
+}
+
+export const tokenFn = async (id: number[]): Promise<{ accessToken: string; expireTime: string }> => {
+    return fetcher<{ accessToken: string; expireTime: string }>(
+        FetcherMethod.POST,
+        "/api/v1/oauth2/google/token",id
+    )
+    
+}
+
 export const batchMoveServer = async (data: ModelBatchMoveServerForm): Promise<void> => {
     return fetcher<void>(FetcherMethod.POST, "/api/v1/batch-move/server", data)
 }

@@ -69,7 +69,7 @@ export default function Header() {
 
     return isDesktop ? (
         <header className="flex pt-8 px-4 dark:bg-black/40 bg-muted border-b-[1px] overflow-visible">
-            <NavigationMenu className="flex flex-col items-start relative max-w-5xl mx-auto">
+            <NavigationMenu className="flex flex-col items-start relative max-w-6xl mx-auto">
                 {!disableAnimatedMan && (
                     <img
                         className={cn(
