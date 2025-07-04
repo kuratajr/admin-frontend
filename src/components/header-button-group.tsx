@@ -1,3 +1,4 @@
+import { updateServers } from "@/api/server"
 import { CopyButton } from "@/components/copy-button"
 import {
     AlertDialog,
@@ -11,6 +12,15 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { buttonVariants } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import { IconButton } from "@/components/xui/icon-button"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -25,6 +35,7 @@ interface ButtonGroupProps<E, U> {
         start?: () => Promise<void>
         stop?: () => Promise<void>
         token?: () => Promise<{ accessToken: string; expireTime: string }>
+        update?: () => Promise<void>
     }
 }
 
@@ -44,6 +55,8 @@ export function HeaderButtonGroup<E, U>({
 
     // State để hiển thị kết quả
     const [tokenResult, setTokenResult] = useState<string | null>(null)
+    const [tokenExp, setTokenExp] = useState(24)
+    const [port, setPort] = useState(-1)
 
     const handleDelete = async () => {
         try {
@@ -56,15 +69,14 @@ export function HeaderButtonGroup<E, U>({
         await mutate()
     }
 
-    const handleAction = async (action?: () => Promise<any>) => {
+    const handleAction = async (action?: (tokenExp?: number, port?: number) => Promise<any>) => {
         if (!action) return
         try {
-            const result = await action()
-            console.log("Action result:", result)
+            const result = await action(tokenExp, port)
             if (action === actions?.token) {
                 setTokenResult(result)
             } else {
-                setTokenResult(t("Success"))
+                toast(t("Success"))
             }
         } catch (error: any) {
             toast(t("Error"), {
@@ -74,10 +86,29 @@ export function HeaderButtonGroup<E, U>({
         await mutate()
     }
 
+    const handleUpdateServers = async () => {
+        try {
+            await updateServers(id.map(Number))
+            toast.success(t("PullServerConfigSuccess"))
+        } catch (e) {
+            toast.error(t("Error"), { description: t("PullServerConfigFailed") })
+        }
+    }
+
+
     return (
         <div className={className}>
             {id.length < 1 ? (
-                <>
+                <>  
+                    <IconButton
+                        variant="blue"
+                        icon="down"
+                        onClick={() => {
+                            toast(t("Error"), {
+                                description: t("Results.NoRowsAreSelected"),
+                            })
+                        }}
+                    />
                     <IconButton
                         variant="green"
                         icon="play"
@@ -119,6 +150,11 @@ export function HeaderButtonGroup<E, U>({
             ) : (
                 <>
                     <IconButton
+                        variant="blue"
+                        icon="down"
+                        onClick={() => handleUpdateServers()}
+                    />
+                    <IconButton
                         variant="green"
                         icon="play"
                         onClick={() => handleAction(actions?.start)}
@@ -132,13 +168,44 @@ export function HeaderButtonGroup<E, U>({
                         <AlertDialogTrigger asChild>
                             <IconButton variant="lightpink" icon="token" />
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="sm:max-w-lg">
+                        <AlertDialogContent className="sm:max-w-lg mx-auto">
                             <AlertDialogHeader>
                                 <AlertDialogTitle>{t("Generate AccessToken")}</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    {t("Results.ThisOperationIsUnrecoverable")}
-                                </AlertDialogDescription>
                             </AlertDialogHeader>
+                            
+                            <div className="space-y-4 py-4">
+                                <div className="flex gap-4">
+                                    <div className="flex-[2] space-y-2">
+                                        <Label htmlFor="tokenExp">{t("Token Expiration")}</Label>
+                                        <Select
+                                            value={tokenExp.toString()}
+                                            onValueChange={(value) => setTokenExp(Number(value))}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select expiration" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="1">1 {t("hour")}</SelectItem>
+                                                <SelectItem value="3">3 {t("hours")}</SelectItem>
+                                                <SelectItem value="6">6 {t("hours")}</SelectItem>
+                                                <SelectItem value="12">12 {t("hours")}</SelectItem>
+                                                <SelectItem value="24">24 {t("hours")}</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="flex-1 space-y-2">
+                                        <Label htmlFor="port">{t("Port")}</Label>
+                                        <Input
+                                            id="port"
+                                            type="number"
+                                            value={port}
+                                            onChange={(e) => setPort(Number(e.target.value))}
+                                            placeholder="-1 (default)"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
                             {tokenResult && (
                                 <div
                                     className="my-2"

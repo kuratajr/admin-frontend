@@ -1,5 +1,5 @@
 import { swrFetcher } from "@/api/api"
-import { deleteServer, forceUpdateServer, startFn, stopFn, tokenFn } from "@/api/server"
+import { deleteServer, forceUpdateServer, startFn, stopFn, tokenFn, updateServers } from "@/api/server"
 import { ActionButtonGroup } from "@/components/action-button-group"
 import { BatchMoveServerIcon } from "@/components/batch-move-server-icon"
 import { CopyButton } from "@/components/copy-button"
@@ -145,8 +145,13 @@ export default function ServerPage() {
                         actions={{
                             start: () => startFn([s.id]),
                             stop: () => stopFn([s.id]),
-                            token: async () => { return await tokenFn([s.id]); },
+                            token: async (tokenExp?: number, port?: number, mutate?: any) => { 
+                                const result = await tokenFn({ servers: [s.id], tokenExp: tokenExp ?? 24, port: port ?? -1 });
+                                if (mutate) await mutate();
+                                return result;
+                            }
                         }}
+                        data={s}
                     >
                         <>
                             <TerminalButton id={s.id} />
@@ -185,7 +190,11 @@ export default function ServerPage() {
                     actions={{
                         start: () => startFn(selectedRows.map((r) => r.original.id)),
                         stop: () => stopFn(selectedRows.map((r) => r.original.id)),
-                        token: async () => { return await tokenFn(selectedRows.map((r) => r.original.id)); },
+                        token: async (tokenExp?: number, port?: number, mutate?: any) => { 
+                            const result = await tokenFn({ servers: selectedRows.map((r) => r.original.id), tokenExp: tokenExp ?? 24, port: port ?? -1 });
+                            if (mutate) await mutate();
+                            return result;
+                        },
                     }}
                 >
                     <IconButton

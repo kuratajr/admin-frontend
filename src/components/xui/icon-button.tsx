@@ -19,6 +19,8 @@ import {
     UserPen,
     CirclePause,
     CirclePlay,
+    LucideRefreshCcw,
+    CircleArrowDown
 } from "lucide-react"
 import { forwardRef } from "react"
 
@@ -44,6 +46,8 @@ export interface IconButtonProps extends ButtonProps {
         | "start"
         | "stop"
         | "token"
+        | "refresh"
+        | "down"
 }
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>((props, ref) => {
@@ -115,6 +119,12 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>((props,
                     }
                     case "token": {
                         return <CogIcon />
+                    }
+                    case "refresh": {
+                        return <LucideRefreshCcw />
+                    }
+                    case "down": {
+                        return <CircleArrowDown />
                     }
                 }
             })()}

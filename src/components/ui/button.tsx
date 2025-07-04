@@ -21,6 +21,7 @@ const buttonVariants = cva(
                 lightred: "bg-red-100 text-red-800 hover:bg-red-200",
                 pink: "bg-pink-600 text-white hover:bg-pink-700",
                 lightpink: "bg-pink-100 text-pink-800 hover:bg-pink-200",
+                blue: "bg-blue-600 text-white hover:bg-blue-700",
             },
             size: {
                 default: "h-10 px-4 py-2",

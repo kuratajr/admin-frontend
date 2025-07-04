@@ -4,6 +4,7 @@ import {
     ModelServerConfigForm,
     ModelServerForm,
     ModelServerTaskResponse,
+    TokenRequest,
 } from "@/types"
 
 import { FetcherMethod, fetcher } from "./api"
@@ -21,17 +22,21 @@ export const updateServerConfigDetail = async (id: number): Promise<void> => {
 }
 
 export const startFn = async (id: number[]) => {
-    return fetcher<void>(FetcherMethod.POST, "/api/v1/server/google/start", id)
+    return fetcher<void>(FetcherMethod.POST, "/api/v1/oauth2/google/start", id)
 }
 
 export const stopFn = async (id: number[]) => {
-    return fetcher<void>(FetcherMethod.POST, "/api/v1/server/google/stop", id)
+    return fetcher<void>(FetcherMethod.POST, "/api/v1/oauth2/google/stop", id)
 }
 
-export const tokenFn = async (id: number[]): Promise<{ accessToken: string; expireTime: string }> => {
+export const updateServers = async (id: number[]) => {
+    return fetcher<void>(FetcherMethod.POST, "/api/v1/server/google/list", id)
+}
+
+export const tokenFn = async (data: TokenRequest): Promise<{ accessToken: string; expireTime: string }> => {
     return fetcher<{ accessToken: string; expireTime: string }>(
         FetcherMethod.POST,
-        "/api/v1/server/google/token",id
+        "/api/v1/oauth2/google/token",data
     )
     
 }

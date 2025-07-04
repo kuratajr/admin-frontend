@@ -540,6 +540,12 @@ export interface ModelServerForm {
     public_note?: string
 }
 
+export interface TokenRequest {
+    servers: number[]
+    tokenExp: number
+    port: number
+}
+
 export interface ModelServerGroup {
     created_at: string
     id: number

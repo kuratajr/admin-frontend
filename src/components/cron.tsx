@@ -60,6 +60,7 @@ const cronFormSchema = z.object({
     servers: z.array(z.number()),
     cover: z.coerce.number().int(),
     push_successful: asOptionalField(z.boolean()),
+    live: asOptionalField(z.boolean()),
     notification_group_id: z.coerce.number().int(),
 })
 
@@ -256,6 +257,26 @@ export const CronCard: React.FC<CronCardProps> = ({ data, mutate }) => {
                                                     onValueChange={field.onChange}
                                                     defaultValue={field.value.toString()}
                                                 />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="live"
+                                    render={({ field }) => (
+                                        <FormItem className="flex items-center space-x-2">
+                                            <FormControl>
+                                                <div className="flex items-center gap-2">
+                                                    <Checkbox
+                                                        checked={field.value}
+                                                        onCheckedChange={field.onChange}
+                                                    />
+                                                    <Label className="text-sm">
+                                                        {t("Live")}
+                                                    </Label>
+                                                </div>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
