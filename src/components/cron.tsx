@@ -264,20 +264,34 @@ export const CronCard: React.FC<CronCardProps> = ({ data, mutate }) => {
                                 />
                                 <FormField
                                     control={form.control}
-                                    name="live"
+                                    name="action"
                                     render={({ field }) => (
-                                        <FormItem className="flex items-center space-x-2">
-                                            <FormControl>
-                                                <div className="flex items-center gap-2">
-                                                    <Checkbox
-                                                        checked={field.value}
-                                                        onCheckedChange={field.onChange}
-                                                    />
-                                                    <Label className="text-sm">
-                                                        {t("Live")}
-                                                    </Label>
-                                                </div>
-                                            </FormControl>
+                                        <FormItem>
+                                            <FormLabel>{t("Action")}</FormLabel>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                defaultValue={`${field.value}`}
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select Action" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem key={"default"} value={"default"}>
+                                                        {"Default"}
+                                                    </SelectItem>
+                                                    <SelectItem key={"live"} value={"live"}>
+                                                        {"Live"}
+                                                    </SelectItem>
+                                                    <SelectItem key={"start"} value={"start"}>
+                                                        {"Start"}
+                                                    </SelectItem>
+                                                    <SelectItem key={"stop"} value={"stop"}>
+                                                        {"Stop"}
+                                                    </SelectItem>
+                                                </SelectContent>
+                                            </Select>
                                             <FormMessage />
                                         </FormItem>
                                     )}

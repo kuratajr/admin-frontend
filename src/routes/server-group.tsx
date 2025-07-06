@@ -81,7 +81,7 @@ export default function ServerGroupPage() {
             cell: ({ row }) => {
                 const s = row.original
                 return (
-                    <div className="max-w-48 whitespace-normal break-words">
+                    <div className="max-w-48 whitespace-normal break-words overflow-hidden text-ellipsis line-clamp-3">
                         <span>{(s.servers || []).join(",")}</span>
                     </div>
                 )
