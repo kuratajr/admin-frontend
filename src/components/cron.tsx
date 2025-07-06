@@ -60,7 +60,7 @@ const cronFormSchema = z.object({
     servers: z.array(z.number()),
     cover: z.coerce.number().int(),
     push_successful: asOptionalField(z.boolean()),
-    live: asOptionalField(z.boolean()),
+    Action: asOptionalField(z.string()),
     notification_group_id: z.coerce.number().int(),
 })
 
