@@ -32,7 +32,7 @@ import {
 import { IconButton } from "@/components/xui/icon-button"
 import { useNotification } from "@/hooks/useNotfication"
 import { useServer } from "@/hooks/useServer"
-import   useUser from "@/hooks/useServer"
+import   useUser from "@/hooks/useUser"
 import { asOptionalField } from "@/lib/utils"
 import { ModelCron } from "@/types"
 import { cronCoverageTypes, cronTypes } from "@/types"
@@ -105,7 +105,7 @@ export const CronCard: React.FC<CronCardProps> = ({ data, mutate }) => {
     const { servers } = useServer()
 
     const {data :user} = useUser()
-    
+
     const serverList = servers?.map((s) => ({
         value: `${s.id}`,
         label: s.name,
