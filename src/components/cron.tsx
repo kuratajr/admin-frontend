@@ -61,8 +61,8 @@ const cronFormSchema = z.object({
     servers: z.array(z.number()),
     cover: z.coerce.number().int(),
     push_successful: asOptionalField(z.boolean()),
-    Action: asOptionalField(z.string()),
-    user_id: asOptionalField(z.coerce.number().int()),
+    action: asOptionalField(z.string()),
+    user_id: z.coerce.number().int(),
     notification_group_id: z.coerce.number().int(),
 })
 
@@ -104,7 +104,14 @@ export const CronCard: React.FC<CronCardProps> = ({ data, mutate }) => {
 
     const { servers } = useServer()
 
-    const {data :user} = useUser()
+    const { data: users } = useUser()
+
+    const userList = Array.isArray(users)
+        ? users.map((s) => ({
+            value: `${s.id}`,
+            label: s.username,
+        }))
+        : [{ value: "", label: "" }]
 
     const serverList = servers?.map((s) => ({
         value: `${s.id}`,
@@ -171,20 +178,18 @@ export const CronCard: React.FC<CronCardProps> = ({ data, mutate }) => {
                                         </FormItem>
                                     )}
                                 />
-                                <FormField
+                                 <FormField
                                     control={form.control}
                                     name="user_id"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>{t("User")}</FormLabel>
                                             <FormControl>
-                                                <MultiSelect
-                                                    options={user ? [{ value: `${user.id}`, label: user.username }] : []}
-                                                    onValueChange={(e) => {
-                                                        const arr = e.map(Number)
-                                                        field.onChange(arr)
-                                                    }}
-                                                    defaultValue={field.value ? [String(field.value)] : []}
+                                                <Combobox
+                                                    placeholder="Search..."
+                                                    options={userList}
+                                                    onValueChange={field.onChange}
+                                                    defaultValue={field.value?.toString()}
                                                 />
                                             </FormControl>
                                             <FormMessage />
