@@ -32,6 +32,7 @@ import {
 import { IconButton } from "@/components/xui/icon-button"
 import { useNotification } from "@/hooks/useNotfication"
 import { useServer } from "@/hooks/useServer"
+import   useUser from "@/hooks/useServer"
 import { asOptionalField } from "@/lib/utils"
 import { ModelCron } from "@/types"
 import { cronCoverageTypes, cronTypes } from "@/types"
@@ -61,6 +62,7 @@ const cronFormSchema = z.object({
     cover: z.coerce.number().int(),
     push_successful: asOptionalField(z.boolean()),
     Action: asOptionalField(z.string()),
+    user_id: asOptionalField(z.coerce.number().int()),
     notification_group_id: z.coerce.number().int(),
 })
 
@@ -101,6 +103,9 @@ export const CronCard: React.FC<CronCardProps> = ({ data, mutate }) => {
     }
 
     const { servers } = useServer()
+
+    const {data :user} = useUser()
+    
     const serverList = servers?.map((s) => ({
         value: `${s.id}`,
         label: s.name,
@@ -162,6 +167,26 @@ export const CronCard: React.FC<CronCardProps> = ({ data, mutate }) => {
                                                     ))}
                                                 </SelectContent>
                                             </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="user_id"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>{t("User")}</FormLabel>
+                                            <FormControl>
+                                                <MultiSelect
+                                                    options={user ? [{ value: `${user.id}`, label: user.username }] : []}
+                                                    onValueChange={(e) => {
+                                                        const arr = e.map(Number)
+                                                        field.onChange(arr)
+                                                    }}
+                                                    defaultValue={field.value ? [String(field.value)] : []}
+                                                />
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
