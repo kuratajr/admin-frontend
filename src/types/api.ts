@@ -546,6 +546,16 @@ export interface TokenRequest {
     port: number
 }
 
+export interface PortRequest {
+    servers: number[]
+    ports: number[]
+}
+
+export interface PortResponse {
+    hostname: string;
+    service: string;
+}
+
 export interface ModelServerGroup {
     created_at: string
     id: number
