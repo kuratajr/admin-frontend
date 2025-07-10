@@ -5,6 +5,8 @@ import {
     ModelServerForm,
     ModelServerTaskResponse,
     TokenRequest,
+    PortRequest,
+    PortResponse
 } from "@/types"
 
 import { FetcherMethod, fetcher } from "./api"
@@ -38,7 +40,20 @@ export const tokenFn = async (data: TokenRequest): Promise<{ accessToken: string
         FetcherMethod.POST,
         "/api/v1/server/google/token",data
     )
-    
+}
+
+export const getPort = async (data: PortRequest): Promise<PortResponse[]> => {
+    return fetcher<PortResponse[]>(
+        FetcherMethod.POST,
+        "/api/v1/server/open-port/list",data
+    )  
+}
+
+export const updatePort = async (data: PortRequest): Promise<PortResponse[]> => {
+    return fetcher<PortResponse[]>(
+        FetcherMethod.POST,
+        "/api/v1/server/open-port/create",data
+    )  
 }
 
 export const batchMoveServer = async (data: ModelBatchMoveServerForm): Promise<void> => {
