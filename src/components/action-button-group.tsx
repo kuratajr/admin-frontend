@@ -161,7 +161,6 @@ export function ActionButtonGroup<E, U>({
             setOpenPortResult(Array.isArray(result) ? result : []) // <-- store result
             setOpenPortDialog(true)
             // Optionally, you can do something with result here
-            if (mutate) await mutate()
         } catch (error: any) {
             toast(t("Error"), {
                 description: error.message,
