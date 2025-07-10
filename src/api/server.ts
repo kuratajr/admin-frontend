@@ -45,14 +45,14 @@ export const tokenFn = async (data: TokenRequest): Promise<{ accessToken: string
 export const getPort = async (data: PortRequest): Promise<PortResponse[]> => {
     return fetcher<PortResponse[]>(
         FetcherMethod.POST,
-        "/api/v1/server/open-port/list",data
+        "/api/v1/server/port/list",data
     )  
 }
 
 export const updatePort = async (data: PortRequest): Promise<PortResponse[]> => {
     return fetcher<PortResponse[]>(
         FetcherMethod.POST,
-        "/api/v1/server/open-port/create",data
+        "/api/v1/server/port/create",data
     )  
 }
 
