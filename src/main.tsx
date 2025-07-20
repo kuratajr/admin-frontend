@@ -20,6 +20,7 @@ import ProfilePage from "./routes/profile"
 import ProtectedRoute from "./routes/protect"
 import Root from "./routes/root"
 import ServerPage from "./routes/server"
+import ServerListPage from "./routes/server-list"
 import ServerGroupPage from "./routes/server-group"
 import ServicePage from "./routes/service"
 import SettingsPage from "./routes/settings"
@@ -47,6 +48,14 @@ const router = createBrowserRouter([
                 element: (
                     <ServerProvider withServerGroup>
                         <ServerPage />
+                    </ServerProvider>
+                ),
+            },
+            {
+                path: "/dashboard/listserver",
+                element: (
+                    <ServerProvider withServerGroup>
+                        <ServerListPage />
                     </ServerProvider>
                 ),
             },
