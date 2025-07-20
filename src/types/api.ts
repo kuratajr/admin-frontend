@@ -515,6 +515,16 @@ export interface ModelServer {
     uuid: string
 }
 
+export interface ModelServerList {
+    created_at: string
+    /** DDNS配置 */
+    id: number
+    last_active: string
+    name: string
+    /** 管理员可见备注 */
+    host: string
+    creator_email: string
+}
 export interface ModelServerConfigForm {
     config: string
     servers: number[]
@@ -556,6 +566,7 @@ export interface PortResponse {
     service: string;
 }
 
+
 export interface ModelServerGroup {
     created_at: string
     id: number
@@ -578,6 +589,12 @@ export interface ModelServerTaskResponse {
     failure?: number[]
     offline?: number[]
     success?: number[]
+}
+
+export interface ModelWorkspaceTaskResponse {
+    message?: string
+    status?: string
+    user_id?: string
 }
 
 export interface ModelService {
