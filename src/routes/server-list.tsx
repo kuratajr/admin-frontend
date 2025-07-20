@@ -1,17 +1,20 @@
 import { swrFetcher } from "@/api/api"
-import { deleteServer, forceUpdateServer, getPort, startFn, stopFn, tokenFn, updatePort } from "@/api/server"
+import {
+    deleteServer,
+    getPort,
+    startFn,
+    stopFn,
+    syncWorkspace,
+    tokenFn,
+    updatePort,
+} from "@/api/server"
 import { ActionButtonGroup } from "@/components/action-button-group"
-import { BatchMoveServerIcon } from "@/components/batch-move-server-icon"
+
 import { CopyButton } from "@/components/copy-button"
 import { GroupSwitch } from "@/components/group-switch"
 import { HeaderButtonGroup } from "@/components/header-button-group"
-import { InstallCommandsMenu } from "@/components/install-commands"
-import { NoteMenu } from "@/components/note-menu"
+
 import { ServerTab } from "@/components/server-tab"
-import { ServerCard } from "@/components/server"
-import { ServerConfigCard } from "@/components/server-config"
-import { ServerConfigCardBatch } from "@/components/server-config-batch"
-import { TerminalButton } from "@/components/terminal"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -33,8 +36,12 @@ import {
 import { IconButton } from "@/components/xui/icon-button"
 import { useServer } from "@/hooks/useServer"
 import { SORT_ORDERS, SORT_TYPES, useSort } from "@/hooks/useSort"
-import { cn, joinIP } from "@/lib/utils"
-import { ModelServerTaskResponse, ModelServer as Server } from "@/types"
+import { cn} from "@/lib/utils"
+
+import {
+    ModelWorkspaceTaskResponse,
+    ModelServerList as ServerList,
+} from "@/types"
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
@@ -42,9 +49,12 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import useSWR from "swr"
 
-export default function ServerPage() {
+export default function ServerListPage() {
     const { t } = useTranslation()
-    const { data, mutate, error, isLoading } = useSWR<Server[]>("/api/v1/server", swrFetcher)
+    const { data, mutate, error, isLoading } = useSWR<ServerList[]>(
+        "/api/v1/server-list",
+        swrFetcher,
+    )
     const { serverGroups } = useServer()
     const { sortType, sortOrder, setSortOrder, setSortType } = useSort()
     const [currentGroup, setCurrentGroup] = useState<string>("All")
@@ -58,7 +68,7 @@ export default function ServerPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [error])
 
-    const columns: ColumnDef<Server>[] = [
+    const columns: ColumnDef<ServerList>[] = [
         {
             id: "select",
             header: ({ table }) => (
@@ -84,7 +94,7 @@ export default function ServerPage() {
         {
             header: "ID",
             accessorKey: "id",
-            accessorFn: (row) => `${row.id}(${row.display_index})`,
+            accessorFn: (row) => `${row.id}`,
         },
         {
             header: t("Name"),
@@ -92,61 +102,25 @@ export default function ServerPage() {
             accessorFn: (row) => row.name,
             cell: ({ row }) => {
                 const s = row.original
-                return <div className="max-w-24 whitespace-normal break-words">{s.name}</div>
+                return <div className="max-w-60 whitespace-normal break-words">{s.name}</div>
             },
         },
         {
-            header: t("Group"),
-            accessorKey: "groups",
-            accessorFn: (row) => {
+            header: t("Create Email"),
+            accessorKey: "creator_email",
+            accessorFn: (row) => row.creator_email,
+            cell: ({ row }) => {
+                const s = row.original
                 return (
-                    serverGroups
-                        ?.filter((sg) => sg.servers?.includes(row.id))
-                        .map((sg) => sg.group.id) || []
+                    <div className="max-w-60 whitespace-normal break-words">{s.creator_email}</div>
                 )
             },
         },
         {
-            id: "ip",
-            header: "IP",
+            header: "Host",
             cell: ({ row }) => {
                 const s = row.original
-                return (
-                    <div className="max-w-24 whitespace-normal break-words">
-                        {joinIP(s.geoip?.ip)}
-                    </div>
-                )
-            },
-        },
-        {
-            header: t("Version"),
-            accessorKey: "host.version",
-            accessorFn: (row) => row.host.version || t("Unknown"),
-        },
-        {
-            header: t("EnableDDNS"),
-            accessorKey: "enableDDNS",
-            accessorFn: (row) => row.enable_ddns ?? false,
-        },
-        {
-            header: t("HideForGuest"),
-            accessorKey: "hideForGuest",
-            accessorFn: (row) => row.hide_for_guest ?? false,
-        },
-        {
-            id: "note",
-            header: t("Note"),
-            cell: ({ row }) => {
-                const s = row.original
-                return <NoteMenu note={{ private: s.note, public: s.public_note }} />
-            },
-        },
-        {
-            id: "uuid",
-            header: "UUID",
-            cell: ({ row }) => {
-                const s = row.original
-                return <CopyButton text={s.uuid} />
+                return <CopyButton text={s.host} />
             },
         },
         {
@@ -159,21 +133,24 @@ export default function ServerPage() {
                         className="flex gap-2"
                         delete={{ fn: deleteServer, id: s.id, mutate: mutate }}
                         actions={{
-                            start: () => startFn([s.id], "server"),
-                            stop: () => stopFn([s.id], "server"),
+                            start: () => startFn([s.id], "serverlist"),
+                            stop: () => stopFn([s.id], "serverlist"),
                             token: async (tokenExp?: number, port?: number, mutate?: any) => {
-                                const result = await tokenFn({
-                                    servers: [s.id],
-                                    tokenExp: tokenExp ?? 24,
-                                    port: port ?? -1,
-                                }, "server")
+                                const result = await tokenFn(
+                                    {
+                                        servers: [s.id],
+                                        tokenExp: tokenExp ?? 24,
+                                        port: port ?? -1,
+                                    },
+                                    "serverlist",
+                                )
                                 if (mutate) await mutate()
                                 return result
                             },
                         }}
                         listPort={async (port?: number) => {
                             // Call getPort API with server id and port
-                            return await getPort({ servers: [s.id], ports:  [port ?? -1]  })
+                            return await getPort({ servers: [s.id], ports: [port ?? -1] })
                         }}
                         updatePort={async (port?: number[]) => {
                             // Call updatePort API with server id and port
@@ -181,11 +158,7 @@ export default function ServerPage() {
                         }}
                         data={s}
                     >
-                        <>
-                            <TerminalButton id={s.id} />
-                            <ServerCard mutate={mutate} data={s} />
-                            <ServerConfigCard sid={s.id} variant="outline" />
-                        </>
+                        <></>
                     </ActionButtonGroup>
                 )
             },
@@ -220,35 +193,6 @@ export default function ServerPage() {
                 switch (sortType) {
                     case "name":
                         comparison = a.name.localeCompare(b.name)
-                        break
-                    case "uptime":
-                        comparison = (a.state?.uptime ?? 0) - (b.state?.uptime ?? 0)
-                        break
-                    case "system":
-                        comparison = (a.host?.platform ?? "").localeCompare(b.host?.platform ?? "")
-                        break
-                    case "cpu":
-                        comparison = (a.state?.cpu ?? 0) - (b.state?.cpu ?? 0)
-                        break
-                    case "mem":
-                        comparison = (a.state?.mem_used ?? 0) - (b.state?.mem_used ?? 0)
-                        break
-                    case "disk":
-                        comparison = (a.state?.disk_used ?? 0) - (b.state?.disk_used ?? 0)
-                        break
-                    case "up":
-                        comparison = (a.state?.net_out_speed ?? 0) - (b.state?.net_out_speed ?? 0)
-                        break
-                    case "down":
-                        comparison = (a.state?.net_in_speed ?? 0) - (b.state?.net_in_speed ?? 0)
-                        break
-                    case "up total":
-                        comparison =
-                            (a.state?.net_out_transfer ?? 0) - (b.state?.net_out_transfer ?? 0)
-                        break
-                    case "down total":
-                        comparison =
-                            (a.state?.net_in_transfer ?? 0) - (b.state?.net_in_transfer ?? 0)
                         break
                     default:
                         comparison = 0
@@ -363,33 +307,37 @@ export default function ServerPage() {
                             mutate: mutate,
                         }}
                         actions={{
-                            start: () => startFn(selectedRows.map((r) => r.original.id), "server"),
-                            stop: () => stopFn(selectedRows.map((r) => r.original.id), "server"),
+                            start: () =>
+                                startFn(
+                                    selectedRows.map((r) => r.original.id),
+                                    "serverlist",
+                                ),
+                            stop: () =>
+                                stopFn(
+                                    selectedRows.map((r) => r.original.id),
+                                    "serverlist",
+                                ),
                             token: async (tokenExp?: number, port?: number, mutate?: any) => {
-                                const result = await tokenFn({
-                                    servers: selectedRows.map((r) => r.original.id),
-                                    tokenExp: tokenExp ?? 24,
-                                    port: port ?? -1,
-                                }, "server")
+                                const result = await tokenFn(
+                                    {
+                                        servers: selectedRows.map((r) => r.original.id),
+                                        tokenExp: tokenExp ?? 24,
+                                        port: port ?? -1,
+                                    },
+                                    "serverlist",
+                                )
                                 if (mutate) await mutate()
                                 return result
                             },
                         }}
                     >
                         <IconButton
+                            className="shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] bg-blue-700 text-white hover:bg-blue-600 dark:hover:bg-blue-800 rounded-lg"
                             icon="update"
                             onClick={async () => {
-                                const id = selectedRows.map((r) => r.original.id)
-                                if (id.length < 1) {
-                                    toast(t("Error"), {
-                                        description: t("Results.SelectAtLeastOneServer"),
-                                    })
-                                    return
-                                }
-
-                                let resp: ModelServerTaskResponse = {}
+                                let resp: ModelWorkspaceTaskResponse = {}
                                 try {
-                                    resp = await forceUpdateServer(id)
+                                    resp = await syncWorkspace()
                                 } catch (e) {
                                     console.error(e)
                                     toast(t("Error"), {
@@ -399,26 +347,13 @@ export default function ServerPage() {
                                 }
                                 toast(t("Done"), {
                                     description:
-                                        t("Results.ForceUpdate") +
-                                        (resp.success?.length
-                                            ? t(`Success`) + ` [${resp.success.join(",")}]`
-                                            : "") +
-                                        (resp.failure?.length
-                                            ? t(`Failure`) + ` [${resp.failure.join(",")}]`
-                                            : "") +
-                                        (resp.offline?.length
-                                            ? t(`Offline`) + ` [${resp.offline.join(",")}]`
+                                        t("Results.SuccessfullyUpdatedWorkspace") +
+                                        (resp.message?.length
+                                            ? t(` Success `) + ` [${resp.message}]`
                                             : ""),
                                 })
                             }}
                         />
-
-                        <BatchMoveServerIcon serverIds={selectedRows.map((r) => r.original.id)} />
-                        <ServerConfigCardBatch
-                            sid={selectedRows.map((r) => r.original.id)}
-                            className="shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] bg-yellow-600 text-white hover:bg-yellow-500 dark:hover:bg-yellow-700 rounded-lg"
-                        />
-                        <InstallCommandsMenu className="shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] bg-blue-700 text-white hover:bg-blue-600 dark:hover:bg-blue-800 rounded-lg" />
                     </HeaderButtonGroup>
                 </div>
             </div>
