@@ -255,7 +255,7 @@ export const ServerCard: React.FC<ServerCardProps> = ({ data, mutate }) => {
                                     )}
                                 />
 
-                                <FormField
+                                {/* <FormField
                                     control={form.control}
                                     name="zone"
                                     render={({ field }) => (
@@ -289,7 +289,7 @@ export const ServerCard: React.FC<ServerCardProps> = ({ data, mutate }) => {
                                     )}
                                 />
 
-                                {/* <FormField
+                                <FormField
                                     control={form.control}
                                     name="project_id"
                                     render={({ field }) => {
@@ -381,7 +381,7 @@ export const ServerCard: React.FC<ServerCardProps> = ({ data, mutate }) => {
                                             <FormMessage />
                                         </FormItem>
                                     )}
-                                />
+                                /> */}
 
                                 <FormField
                                     control={form.control}
@@ -395,7 +395,7 @@ export const ServerCard: React.FC<ServerCardProps> = ({ data, mutate }) => {
                                             <FormMessage />
                                         </FormItem>
                                     )}
-                                /> */}
+                                />
 
                                 <FormField
                                     control={form.control}
