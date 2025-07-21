@@ -35,7 +35,7 @@ import { conv } from "@/lib/utils"
 import { asOptionalField } from "@/lib/utils"
 import { ModelServer } from "@/types"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -93,17 +93,17 @@ export const ServerCard: React.FC<ServerCardProps> = ({ data, mutate }) => {
         },
     })
 
-    useEffect(() => {
-        const zone = form.getValues("zone")
-        if (zone === "asia-east1") {
-            form.setValue("project_id", "712605920671")
-        } else if (zone === "us-east4") {
-            form.setValue("project_id", "312045414151")
-        } else {
-            form.setValue("project_id", "")
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [form.watch("zone")])
+    // useEffect(() => {
+    //     const zone = form.getValues("zone")
+    //     if (zone === "asia-east1") {
+    //         form.setValue("project_id", "712605920671")
+    //     } else if (zone === "us-east4") {
+    //         form.setValue("project_id", "312045414151")
+    //     } else {
+    //         form.setValue("project_id", "")
+    //     }
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [form.watch("zone")])
 
     const [open, setOpen] = useState(false)
 
@@ -289,7 +289,7 @@ export const ServerCard: React.FC<ServerCardProps> = ({ data, mutate }) => {
                                     )}
                                 />
 
-                                <FormField
+                                {/* <FormField
                                     control={form.control}
                                     name="project_id"
                                     render={({ field }) => {
@@ -395,7 +395,8 @@ export const ServerCard: React.FC<ServerCardProps> = ({ data, mutate }) => {
                                             <FormMessage />
                                         </FormItem>
                                     )}
-                                />
+                                /> */}
+
                                 <FormField
                                     control={form.control}
                                     name="public_note"
