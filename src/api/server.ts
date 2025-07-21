@@ -33,7 +33,7 @@ export const stopFn = async (id: number[], mode: string) => {
 }
 
 export const updateServers = async (id: number[]) => {
-    return fetcher<void>(FetcherMethod.POST, "/api/v1/server/google/list/server", id)
+    return fetcher<void>(FetcherMethod.POST, "/api/v1/server/google/list", id)
 }
 
 export const tokenFn = async (data: TokenRequest, mode: string): Promise<{ accessToken: string; expireTime: string }> => {
