@@ -32,7 +32,7 @@ import {
 import { IconButton } from "@/components/xui/icon-button"
 import { useNotification } from "@/hooks/useNotfication"
 import { useServer } from "@/hooks/useServer"
-import   useUser from "@/hooks/useUser"
+import useUser from "@/hooks/useUser"
 import { asOptionalField } from "@/lib/utils"
 import { ModelCron } from "@/types"
 import { cronCoverageTypes, cronTypes } from "@/types"
@@ -47,6 +47,7 @@ import { z } from "zod"
 import { Combobox } from "./ui/combobox"
 import { Textarea } from "./ui/textarea"
 import { MultiSelect } from "./xui/multi-select"
+import useServerList from "@/hooks/useServerList"
 
 interface CronCardProps {
     data?: ModelCron
@@ -62,12 +63,14 @@ const cronFormSchema = z.object({
     cover: z.coerce.number().int(),
     push_successful: asOptionalField(z.boolean()),
     action: asOptionalField(z.string()),
+    batch_type: z.enum(["server", "serverlist"]).default("server"),
     user_id: z.coerce.number().int(),
     notification_group_id: z.coerce.number().int(),
 })
 
 export const CronCard: React.FC<CronCardProps> = ({ data, mutate }) => {
     const { t } = useTranslation()
+    
     const form = useForm<z.infer<typeof cronFormSchema>>({
         resolver: zodResolver(cronFormSchema),
         defaultValues: data
@@ -102,7 +105,12 @@ export const CronCard: React.FC<CronCardProps> = ({ data, mutate }) => {
         form.reset()
     }
 
+    const batchType = form.watch("batch_type")
+
+
     const { servers } = useServer()
+    
+    const { data: serversList } = useServerList()
 
     const { data: users } = useUser()
 
@@ -113,10 +121,23 @@ export const CronCard: React.FC<CronCardProps> = ({ data, mutate }) => {
         }))
         : [{ value: "", label: "" }]
 
-    const serverList = servers?.map((s) => ({
-        value: `${s.id}`,
-        label: s.name,
-    })) || [{ value: "", label: "" }]
+
+    // const serverList = servers?.map((s) => ({
+    //     value: `${s.id}`,
+    //     label: s.name,
+    // })) || [{ value: "", label: "" }]
+    const serverList =
+        batchType === "server"
+            ? servers?.map((s) => ({
+                value: `${s.id}`,
+                label: s.name,
+            })) || [{ value: "", label: "" }]
+            : Array.isArray(serversList)
+                ? serversList.map((sl) => ({
+                    value: `${sl.id}`,
+                    label: sl.name,
+                }))
+                : [{ value: "", label: "" }]
 
     const { notifierGroup } = useNotification()
     const ngroupList = notifierGroup?.map((ng) => ({
@@ -174,24 +195,6 @@ export const CronCard: React.FC<CronCardProps> = ({ data, mutate }) => {
                                                     ))}
                                                 </SelectContent>
                                             </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                 <FormField
-                                    control={form.control}
-                                    name="user_id"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>{t("User")}</FormLabel>
-                                            <FormControl>
-                                                <Combobox
-                                                    placeholder="Search..."
-                                                    options={userList}
-                                                    onValueChange={field.onChange}
-                                                    defaultValue={field.value?.toString()}
-                                                />
-                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -256,6 +259,26 @@ export const CronCard: React.FC<CronCardProps> = ({ data, mutate }) => {
                                 />
                                 <FormField
                                     control={form.control}
+                                    name="batch_type"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>{t("Batch Type")}</FormLabel>
+                                            <FormControl>
+                                                <Combobox
+                                                    options={[
+                                                        { value: "server", label: t("All Servers") },
+                                                        { value: "serverlist", label: t("All Server List") },
+                                                    ]}
+                                                    onValueChange={field.onChange}
+                                                    defaultValue={`${field.value}`}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
                                     name="servers"
                                     render={({ field }) => (
                                         <FormItem>
@@ -286,6 +309,24 @@ export const CronCard: React.FC<CronCardProps> = ({ data, mutate }) => {
                                                     options={ngroupList}
                                                     onValueChange={field.onChange}
                                                     defaultValue={field.value.toString()}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="user_id"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>{t("UserID")}</FormLabel>
+                                            <FormControl>
+                                                <Combobox
+                                                    placeholder="Search..."
+                                                    options={userList}
+                                                    onValueChange={field.onChange}
+                                                    defaultValue={field.value?.toString()}
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -326,6 +367,26 @@ export const CronCard: React.FC<CronCardProps> = ({ data, mutate }) => {
                                         </FormItem>
                                     )}
                                 />
+                                {/* <FormField
+                                    control={form.control}
+                                    name="live"
+                                    render={({ field }) => (
+                                        <FormItem className="flex items-center space-x-2">
+                                            <FormControl>
+                                                <div className="flex items-center gap-2">
+                                                    <Checkbox
+                                                        checked={field.value}
+                                                        onCheckedChange={field.onChange}
+                                                    />
+                                                    <Label className="text-sm">
+                                                        {t("Live")}
+                                                    </Label>
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                /> */}
                                 <FormField
                                     control={form.control}
                                     name="push_successful"
