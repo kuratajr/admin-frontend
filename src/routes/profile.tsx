@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useMainStore } from "@/hooks/useMainStore"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { useServer } from "@/hooks/useServer"
+import useServerList from "@/hooks/useServerList"
 import useSetting from "@/hooks/useSetting"
 import { Boxes, Server } from "lucide-react"
 import { useEffect } from "react"
@@ -15,9 +16,11 @@ import { toast } from "sonner"
 export default function ProfilePage() {
     const { profile, setProfile } = useMainStore()
     const { servers, serverGroups } = useServer()
+    const { data: serversListData } = useServerList()
     const { data: settingData } = useSetting()
     const isDesktop = useMediaQuery("(min-width: 890px)")
 
+   
     useEffect(() => {
         const oauth2 = new URLSearchParams(window.location.search).get("oauth2")
         if (oauth2) {
@@ -85,7 +88,7 @@ export default function ProfilePage() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="text-lg font-semibold">
-                                {servers?.length || 0}
+                                {servers?.length || 0} || {Array.isArray(serversListData) ? serversListData.length : 0}
                             </CardContent>
                         </Card>
                         <Card className="w-full">
