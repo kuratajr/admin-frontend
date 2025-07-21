@@ -157,7 +157,7 @@ export default function ServerPage() {
                 return (
                     <ActionButtonGroup
                         className="flex gap-2"
-                        delete={{ fn: deleteServer, id: s.id, mutate: mutate }}
+                        delete={{ fn: (id: number[]) => deleteServer(id, "server"), id: s.id, mutate: mutate }}
                         actions={{
                             start: () => startFn([s.id], "server"),
                             stop: () => stopFn([s.id], "server"),
@@ -358,7 +358,7 @@ export default function ServerPage() {
                     <HeaderButtonGroup
                         className="flex gap-2"
                         delete={{
-                            fn: deleteServer,
+                            fn: (id: number[]) => deleteServer(id, "server"),
                             id: selectedRows.map((r) => r.original.id),
                             mutate: mutate,
                         }}
