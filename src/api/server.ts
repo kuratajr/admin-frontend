@@ -16,8 +16,8 @@ export const updateServer = async (id: number, data: ModelServerForm): Promise<v
     return fetcher<void>(FetcherMethod.PATCH, `/api/v1/server/${id}`, data)
 }
 
-export const deleteServer = async (id: number[]): Promise<void> => {
-    return fetcher<void>(FetcherMethod.POST, "/api/v1/batch-delete/server", id)
+export const deleteServer = async (id: number[], mode: string): Promise<void> => {
+    return fetcher<void>(FetcherMethod.POST, `/api/v1/batch-delete/${mode}`, id)
 }
 
 export const updateServerConfigDetail = async (id: number): Promise<void> => {
