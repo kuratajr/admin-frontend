@@ -347,9 +347,8 @@ export default function ServerListPage() {
                                 }
                                 toast(t("Done"), {
                                     description:
-                                        t("Results.SuccessfullyUpdatedWorkspace") +
                                         (resp.message?.length
-                                            ? t(` Success `) + ` [${resp.message}]`
+                                            ? ` [${resp.message}]`
                                             : ""),
                                 })
                             }}
